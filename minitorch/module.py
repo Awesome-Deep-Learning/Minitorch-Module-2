@@ -20,12 +20,16 @@ class Module:
         return self.__dict__["_modules"].values()
 
     def train(self):
-        "Set the mode of this module and all descendent modules to `train`."
-        raise NotImplementedError('Need to include this file from past assignment.')
+        """Set the mode of this module and all descendent modules to `train`."""
+        self.training = True
+        for m in self.modules():
+            m.training = True
 
     def eval(self):
-        "Set the mode of this module and all descendent modules to `eval`."
-        raise NotImplementedError('Need to include this file from past assignment.')
+        """Set the mode of this module and all descendent modules to `eval`."""
+        self.training = False
+        for m in self.modules():
+            m.training = False
 
     def named_parameters(self):
         """
@@ -35,11 +39,20 @@ class Module:
         Returns:
             list of pairs: Contains the name and :class:`Parameter` of each ancestor parameter.
         """
-        raise NotImplementedError('Need to include this file from past assignment.')
+        named_params = []
+        # the module params
+        for name, param in self._parameters.items():
+            named_params.append((name, param))
+        # descendents params
+        for module_name, module in self._modules.items():
+            for param_name, param in module.named_parameters():
+                named_params.append((f"{module_name}.{param_name}", param))
+        return named_params
 
     def parameters(self):
-        "Enumerate over all the parameters of this module and its descendents."
-        raise NotImplementedError('Need to include this file from past assignment.')
+        """Enumerate over all the parameters of this module and its descendents."""
+        params = [param for name, param in self.named_parameters()]
+        return params
 
     def add_parameter(self, k, v):
         """
@@ -122,7 +135,7 @@ class Parameter:
                 self.value.name = self.name
 
     def update(self, x):
-        "Update the parameter value."
+        """Update the parameter value."""
         self.value = x
         if hasattr(x, "requires_grad_"):
             self.value.requires_grad_(True)

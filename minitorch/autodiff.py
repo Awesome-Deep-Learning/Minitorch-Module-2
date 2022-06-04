@@ -190,7 +190,8 @@ class History:
         Returns:
             list of numbers : a derivative with respect to `inputs`
         """
-        raise NotImplementedError('Need to include this file from past assignment.')
+        # TODO: Implement for Task 1.4.
+        raise NotImplementedError('Need to implement for Task 1.4')
 
 
 class FunctionBase:
@@ -272,7 +273,8 @@ class FunctionBase:
         """
         # Tip: Note when implementing this function that
         # cls.backward may return either a value or a tuple.
-        raise NotImplementedError('Need to include this file from past assignment.')
+        # TODO: Implement for Task 1.3.
+        raise NotImplementedError('Need to implement for Task 1.3')
 
 
 # Algorithms for backpropagation
@@ -293,7 +295,8 @@ def topological_sort(variable):
         list of Variables : Non-constant Variables in topological order
                             starting from the right.
     """
-    raise NotImplementedError('Need to include this file from past assignment.')
+    # TODO: Implement for Task 1.4.
+    raise NotImplementedError('Need to implement for Task 1.4')
 
 
 def backpropagate(variable, deriv):
@@ -309,4 +312,5 @@ def backpropagate(variable, deriv):
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError('Need to include this file from past assignment.')
+    # TODO: Implement for Task 1.4.
+    raise NotImplementedError('Need to implement for Task 1.4')
