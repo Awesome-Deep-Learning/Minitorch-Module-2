@@ -1,7 +1,7 @@
 import random
 from .operators import prod
 from numpy import array, float64, ndarray
-import numba
+# import numba
 
 MAX_DIMS = 32
 
@@ -119,8 +119,9 @@ class TensorData:
         assert len(self._storage) == self.size
 
     def to_cuda_(self):  # pragma: no cover
-        if not numba.cuda.is_cuda_array(self._storage):
-            self._storage = numba.cuda.to_device(self._storage)
+        # if not numba.cuda.is_cuda_array(self._storage):
+        #     self._storage = numba.cuda.to_device(self._storage)
+        raise NotImplementedError
 
     def is_contiguous(self):
         """
