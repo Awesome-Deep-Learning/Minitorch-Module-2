@@ -34,16 +34,24 @@ class Linear(minitorch.Module):
         self.bias = RParam(out_size)
         self.out_size = out_size
 
+    # TODO: check why this is not working
+    # def forward(self, x):
+    #     n, d = x.shape
+    #     d, m = self.weights.value.shape
+    #     outputs = minitorch.Tensor(minitorch.TensorData(np.zeros(n * m), (n, m)), backend=x.backend)
+    #     for i in range(n):
+    #         for j in range(m):
+    #             for k in range(d):
+    #                 outputs[i, j] = x[i, k] * self.weights.value[k, j]
+    #             outputs[i, j] += self.bias.value[j]
+    #     return outputs
+
     def forward(self, x):
-        n, d = x.shape
-        d, m = self.weights.value.shape
-        outputs = minitorch.Tensor(minitorch.TensorData(np.zeros(n * m), (n, m)), backend=self.weights.value.backend)
-        for i in range(n):
-            for j in range(m):
-                for k in range(d):
-                    outputs[i, j] = x[i, k] * self.weights.value[k, j]
-                outputs[i, j] += self.bias.value[j]
-        return outputs
+        batch, in_size = x.shape
+        return (
+            self.weights.value.view(1, in_size, self.out_size)
+            * x.view(batch, in_size, 1)
+        ).sum(1).view(batch, self.out_size) + self.bias.value.view(self.out_size)
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
