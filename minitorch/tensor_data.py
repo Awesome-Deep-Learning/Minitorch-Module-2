@@ -26,7 +26,8 @@ def index_to_position(index, strides):
 
     position = 0
     for i, s in zip(index, strides):
-        position += i * s
+        assert len(index) == len(strides), f"Index and strides must be same length: {index, strides}"
+        position += int(i * s)
     return position
 
 
@@ -47,8 +48,7 @@ def to_index(ordinal, shape, out_index):
 
     """
     for i in range(len(out_index)):
-        out_index[i] = ordinal % shape[i]
-        ordinal = ordinal // shape[i]
+        out_index[i], ordinal = divmod(ordinal, prod(shape[i + 1:]))
 
 
 def broadcast_index(big_index, big_shape, shape, out_index):
@@ -68,15 +68,14 @@ def broadcast_index(big_index, big_shape, shape, out_index):
     Returns:
         None : Fills in `out_index`.
     """
-    if len(big_index) < len(shape):
-        big_index = (0,) * (len(shape) - len(big_index)) + big_index
+    assert len(out_index) == len(shape), f"Out index and shape must be same length: {out_index, shape}"
     for i in range(len(shape)):
         if shape[i] == 1:
-            out_index[i] = big_index[i]
+            out_index[i] = 0
         elif big_shape[i] == shape[i]:
             out_index[i] = big_index[i]
-        else:
-            raise IndexingError("Cannot broadcast shapes {} and {}".format(big_shape, shape))
+        elif big_shape[i] > shape[i]:
+            out_index[i] = big_index[i] % shape[i]
 
 
 def shape_broadcast(shape1, shape2):
