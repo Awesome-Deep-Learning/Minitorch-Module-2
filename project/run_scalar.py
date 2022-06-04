@@ -2,15 +2,24 @@
 Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
+from typing import List
+
 import minitorch
 import random
+from minitorch import Scalar
 
 
 class Network(minitorch.Module):
     def __init__(self, hidden_layers):
         super().__init__()
-        # TODO: Implement for Task 1.5.
-        raise NotImplementedError('Need to implement for Task 1.5')
+        # hidden_layer_neurons = [random.randint(5, 10) for _ in range(hidden_layers)]
+        # print(f"Hidden layer neurons: {hidden_layer_neurons}")
+        # self.layer1 = Linear(2, hidden_layer_neurons[0])
+        # self.layer2 = Linear(5, hidden_layer_neurons[1])
+        # self.layer3 = Linear(5, 1)
+        self.layer1 = Linear(2, 5)
+        self.layer2 = Linear(5, 5)
+        self.layer3 = Linear(5, 1)
 
     def forward(self, x):
         middle = [h.relu() for h in self.layer1.forward(x)]
@@ -38,9 +47,15 @@ class Linear(minitorch.Module):
                 )
             )
 
-    def forward(self, inputs):
-        # TODO: Implement for Task 1.5.
-        raise NotImplementedError('Need to implement for Task 1.5')
+    def forward(self, inputs) -> List[Scalar]:
+        outputs = []
+        n, m = len(self.weights), len(self.weights[0])
+        for j in range(m):
+            output = Scalar(0)
+            for i in range(n):
+                output += self.weights[i][j].value * inputs[i] + self.bias[j].value
+            outputs.append(output)
+        return outputs
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
