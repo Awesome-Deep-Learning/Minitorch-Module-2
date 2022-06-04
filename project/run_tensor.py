@@ -2,6 +2,7 @@
 Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
+import numpy as np
 
 import minitorch
 
@@ -21,8 +22,9 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden_layers, 1)
 
     def forward(self, x):
-        # TODO: Implement for Task 2.5.
-        raise NotImplementedError('Need to implement for Task 2.5')
+        middle = self.layer1.forward(x).relu()
+        end = self.layer2.forward(middle).relu()
+        return self.layer3.forward(end).sigmoid()
 
 
 class Linear(minitorch.Module):
@@ -33,8 +35,15 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        # TODO: Implement for Task 2.5.
-        raise NotImplementedError('Need to implement for Task 2.5')
+        n, d = x.shape
+        d, m = self.weights.value.shape
+        outputs = minitorch.Tensor(minitorch.TensorData(np.zeros(n * m), (n, m)), backend=self.weights.value.backend)
+        for i in range(n):
+            for j in range(m):
+                for k in range(d):
+                    outputs[i, j] = x[i, k] * self.weights.value[k, j]
+                outputs[i, j] += self.bias.value[j]
+        return outputs
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
@@ -89,7 +98,7 @@ class TensorTrain:
 
 if __name__ == "__main__":
     PTS = 50
-    HIDDEN = 2
+    HIDDEN = 5
     RATE = 0.5
     data = minitorch.datasets["Simple"](PTS)
     TensorTrain(HIDDEN).train(data, RATE)
