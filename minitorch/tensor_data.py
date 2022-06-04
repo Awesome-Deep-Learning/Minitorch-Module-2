@@ -68,8 +68,15 @@ def broadcast_index(big_index, big_shape, shape, out_index):
     Returns:
         None : Fills in `out_index`.
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    if len(big_index) < len(shape):
+        big_index = (0,) * (len(shape) - len(big_index)) + big_index
+    for i in range(len(shape)):
+        if shape[i] == 1:
+            out_index[i] = big_index[i]
+        elif big_shape[i] == shape[i]:
+            out_index[i] = big_index[i]
+        else:
+            raise IndexingError("Cannot broadcast shapes {} and {}".format(big_shape, shape))
 
 
 def shape_broadcast(shape1, shape2):
@@ -86,8 +93,15 @@ def shape_broadcast(shape1, shape2):
     Raises:
         IndexingError : if cannot broadcast
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    if len(shape1) > MAX_DIMS or len(shape2) > MAX_DIMS:
+        raise IndexingError("Tensor shape too large")
+    if len(shape1) < len(shape2):
+        shape1, shape2 = shape2, shape1
+    shape2 = (1, ) * (len(shape1) - len(shape2)) + shape2
+    for i in range(len(shape1)):
+        if shape1[i] != shape2[i] and shape1[i] != 1 and shape2[i] != 1:
+            raise IndexingError("Cannot broadcast shapes {} and {}".format(shape1, shape2))
+    return tuple(max(s1, s2) for s1, s2 in zip(shape1, shape2))
 
 
 def strides_from_shape(shape):
