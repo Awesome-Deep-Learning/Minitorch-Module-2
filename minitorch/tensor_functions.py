@@ -55,6 +55,8 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
     relu_back_zip = tensor_ops.zip(operators.relu_back)
     log_back_zip = tensor_ops.zip(operators.log_back)
     inv_back_zip = tensor_ops.zip(operators.inv_back)
+    # added zips
+    sigmoid_back_zip = tensor_ops.zip(operators.sigmoid_back)
 
     # Reduce
     add_reduce = tensor_ops.reduce(operators.add, 0.0)
@@ -88,11 +90,15 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
         class Add(Function):
             @staticmethod
             def forward(ctx, t1, t2):
+                ctx.save_for_backward(t1, t2)
                 return add_zip(t1, t2)
 
             @staticmethod
             def backward(ctx, grad_output):
-                return grad_output, grad_output
+                t1, t2 = ctx.saved_values
+                g1 = t1.expand(grad_output)
+                g2 = t2.expand(grad_output)
+                return g1, g2
 
         class Mul(Function):
             @staticmethod
@@ -102,8 +108,11 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                a, b = ctx.saved_values
+                # TODO: How to use `expand`
+                g1 = mul_zip(grad_output, b)
+                g2 = mul_zip(a, grad_output)
+                return a.expand(g1), b.expand(g2)
 
         class Sigmoid(Function):
             @staticmethod
@@ -113,8 +122,8 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                a = ctx.saved_values
+                return sigmoid_back_zip(a, grad_output)
 
         class ReLU(Function):
             @staticmethod
@@ -124,8 +133,8 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                a = ctx.saved_values
+                return relu_back_zip(a, grad_output)
 
         class Log(Function):
             @staticmethod
@@ -135,8 +144,8 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                a = ctx.saved_values
+                return log_back_zip(a, grad_output)
 
         class Exp(Function):
             @staticmethod
@@ -146,8 +155,8 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                a = ctx.saved_values
+                return mul_zip(exp_map(a), grad_output)
 
         class Sum(Function):
             @staticmethod
@@ -187,8 +196,7 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                return grad_output.zeros(), grad_output.zeros()
 
         class EQ(Function):
             @staticmethod
@@ -197,8 +205,7 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                return grad_output.zeros(), grad_output.zeros()
 
         class IsClose(Function):
             @staticmethod
@@ -208,13 +215,15 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
         class Permute(Function):
             @staticmethod
             def forward(ctx, a, order):
-                # TODO: save what for backward
-                return a.permute(order)
+                ctx.save_for_backward(order)
+                return a._new(a._tensor.permute(*order))
 
             @staticmethod
             def backward(ctx, grad_output):
-                # TODO: Implement for Task 2.4.
-                raise NotImplementedError('Need to implement for Task 2.4')
+                order = ctx.saved_values
+                # TODO: think why
+                back_order = [order.index(i) for i in range(len(order))]
+                return grad_output._new(grad_output._tensor.permute(*back_order))
 
         class View(Function):
             @staticmethod
