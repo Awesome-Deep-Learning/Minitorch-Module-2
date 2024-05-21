@@ -233,7 +233,7 @@ def tensor_reduce(fn):
         if reduce_dim is None:
             return minitorch.operators.reduce(fn, out[0])(a_storage)
         for out_position in range(len(out)):
-            out_index = np.zeros(out_shape.shape, dtype=np.int)
+            out_index = np.zeros(out_shape.shape, dtype=np.int64)
             to_index(out_position, out_shape, out_index)
             for i in range(a_shape[reduce_dim]):
                 a_index = out_index
